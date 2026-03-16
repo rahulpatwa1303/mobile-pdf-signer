@@ -80,12 +80,16 @@ export default function PdfViewer({ file, onReset }: PdfViewerProps) {
         centerOnInit
         wheel={{ step: 0.1 }}
       >
-        {({ zoomIn, zoomOut, resetTransform, state }: any) => (
+        {(props: any) => {
+          const { zoomIn, zoomOut, resetTransform, state } = props;
+          const currentScale = state?.scale ?? 1;
+          
+          return (
           <>
             <div 
               className="swipe-container"
               onTouchStart={handleTouchStart}
-              onTouchEnd={(e) => handleTouchEnd(e, state.scale)}
+              onTouchEnd={(e) => handleTouchEnd(e, currentScale)}
             >
               <TransformComponent wrapperStyle={{ width: '100vw', height: '100vh' }}>
                 <Document
@@ -125,25 +129,26 @@ export default function PdfViewer({ file, onReset }: PdfViewerProps) {
               <div className="dock-divider"></div>
 
               <div className="dock-group">
-                <button className="dock-btn" onClick={() => zoomOut()} disabled={state.scale <= 0.5}>
+                <button className="dock-btn" onClick={() => zoomOut()} disabled={currentScale <= 0.5}>
                   <ZoomOut size={20} />
                 </button>
-                
+
                 <button 
                   className="dock-btn-text" 
                   onClick={() => resetTransform()}
                   title="Reset Zoom"
                 >
-                  {Math.round(state.scale * 100)}%
+                  {Math.round(currentScale * 100)}%
                 </button>
 
-                <button className="dock-btn" onClick={() => zoomIn()} disabled={state.scale >= 4}>
+                <button className="dock-btn" onClick={() => zoomIn()} disabled={currentScale >= 4}>
                   <ZoomIn size={20} />
                 </button>
               </div>
             </div>
           </>
-        )}
+          );
+        }}
       </TransformWrapper>
     </div>
   );
