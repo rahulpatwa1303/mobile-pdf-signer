@@ -79,3 +79,24 @@ src/
 ## License
 
 This project is open-source and available under the [MIT License](LICENSE).
+
+## System Design
+
+The application follows a client-heavy web architecture to prioritize data privacy and reduce server overhead. 
+
+### Core Architecture
+
+1. **Client-Side Processing Strategy**
+   - **Privacy First**: PDF documents are loaded entirely into browser memory and are **never** uploaded to an external server. The `services/mockApi.ts` simulates network requests to maintain UI flow without risking data exfiltration.
+   - **Web Workers**: PDF parsing and rendering are offloaded to dedicated Web Workers via `pdfjs-dist` to prevent blocking the main JS thread and ensuring UI animations (like spinners or page swipes) remain 60FPS.
+
+2. **Component Interactions**
+   - `App.tsx` acts as the global state manager, dictating the flow between three distinct application phases:
+     1. **Idle/Upload**: Handled by `FileUploader.tsx`. Uses HTML5 File API and hidden native inputs.
+     2. **Processing/Loading**: Handled by `Loader.tsx`. Simulates asynchronous network calls or cryptographic signing processes.
+     3. **Viewing Frame**: Handled by `PdfViewer.tsx`. 
+
+3. **Rendering & Interaction Engine**
+   - **Canvas Overlay**: Pages are rendered via HTML5 `<canvas>` inside `react-pdf`, dropping text layers to prioritize visual accuracy and rendering speed on underpowered mobile devices.
+   - **Gesture Recognition**: `react-zoom-pan-pinch` wraps the canvas engine, exposing imperative controls (Zoom In, Zoom Out, Reset) alongside passive mobile gesture handling (pinch mechanics).
+   - **Local State Paging**: Custom `onTouchStart` and `onTouchEnd` swipe heuristics are bound directly to the viewport wrapper, calculating delta X-axis distances to trigger page increments without utilizing heavy third-party routing or slider libraries.
